@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forms</title>
+</head>
+
+<body>
+    <!-- <h1>Formulario criado com node.js e express</h1> -->
+
+    <form action="http://localhost:3000/calcular-nota" method="post">
+
+        <label for="nomeAluno">Nome do aluno:
+            <input type="text" name="nomeAluno">
+        </label>
+        <br>
+        <label for="nota01">nota 1:
+            <input type="number" name="nota01">
+        </label>
+        <br>
+        <label for="nota01">nota 2:
+            <input type="number" name="nota02">
+        </label>
+
+        <br>
+        <input type="submit" value="Enviar">
+    </form>
+</body>
+
+</html>
