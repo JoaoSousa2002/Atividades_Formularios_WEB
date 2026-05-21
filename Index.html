@@ -4,29 +4,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forms</title>
+    <title>Form+Express</title>
 </head>
+<style>
+    #divHistorico {
+        max-height: 500px;
+        max-width: fit-content;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+
+    }
+
+    table {
+        border-collapse: collapse;
+        border: 2px solid rgb(140 140 140);
+        font-family: sans-serif;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+
+    thead,
+    tfoot {
+        background-color: rgb(228 240 245);
+    }
+
+    th,
+    td {
+        border: 1px solid rgb(160 160 160);
+        padding: 8px 10px;
+    }
+
+    td:last-of-type {
+        text-align: center;
+    }
+
+    tbody>tr:nth-of-type(even) {
+        background-color: rgb(237 238 242);
+    }
+</style>
 
 <body>
-    <!-- <h1>Formulario criado com node.js e express</h1> -->
+    <h1>Formulario criado com node.js e Express</h1>
 
-    <form action="http://localhost:3000/calcular-nota" method="post">
+    <form id="meuForm">
 
         <label for="nomeAluno">Nome do aluno:
-            <input type="text" name="nomeAluno">
+            <input type="text" id="nomeAluno">
         </label>
         <br>
-        <label for="nota01">nota 1:
-            <input type="number" name="nota01">
+        <label for="nota01">Nota 1:
+            <input type="number" id="nota01">
         </label>
         <br>
-        <label for="nota01">nota 2:
-            <input type="number" name="nota02">
+        <label for="nota01">Nota 2:
+            <input type="number" id="nota02">
         </label>
 
         <br>
         <input type="submit" value="Enviar">
     </form>
+
+    <label for="Lista_Historico">Historico:
+        <p style="display: inline;" id="Lista_Historico"></p>
+        <div id="divHistorico">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">id</th>
+                        <th scope="col">nome do aluno</th>
+                        <th scope="col">Nota 1</th>
+                        <th scope="col">Nota 2</th>
+                        <th scope="col">Media</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabelaHistorico">
+                    <!-- Esse campo será preenchido pela função RenderizarTabelaHistorico pelo Javascript-->
+                </tbody>
+            </table>
+        </div>
+    </label>
+
+    </div>
+    <script>
+        //Se não existir um localStorage, ele cria, se já existir, ele ignora
+        if (!localStorage.getItem("Lista_notas_Alunos")) {
+            localStorage.setItem("Lista_notas_Alunos", JSON.stringify(listaNotas))
+        }
+        
+        //A variavel lista é criada no inicio do script para que a tabela seja atualizada automaticamente
+        let lista = JSON.parse(localStorage.getItem("Lista_notas_Alunos")) || [];
+
+        //Função que renderiza a tabela abaixo do formulario
+        function RenderizaTabelaHistorico() {
+            document.getElementById('corpoTabelaHistorico').innerHTML = lista.map(c => `
+                <tr>
+                    <td>${c.id}</td>
+                    <td>${c.nomeAluno}</td>
+                    <td>${c.nota01}</td>
+                    <td>${c.nota02}</td>
+                    <td>${c.media}</td>
+                    <td>${c.status}</td>
+                </tr>
+            `).join("");
+            console.log("Renderizado")
+        }
+
+        //Dicionario usado 
+        let listaNotas = []
+
+
+        // Async
+        document.getElementById('meuForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // evita recarregar a página
+
+            const nome = document.getElementById('nomeAluno').value
+            const nota01 = document.getElementById('nota01').value;
+            const nota02 = document.getElementById('nota02').value;
+
+            //Requisição ao servidor com async/await
+            const response = await fetch('http://127.0.0.1:3000/calcular-nota', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nota01, nota02 })
+            });
+
+            //Recebe os dados do servidor
+            const dados = await response.json();
+
+            const Lista = JSON.parse(localStorage.getItem("Lista_notas_Alunos") || [])
+            //Quando os dados estiverem prontos, adicionara uma lista no dicionario
+
+            Lista.push({
+                //Como esse projeto não tem opção de excluir items, apenas adicionar, coloquei o tamanho do item como ID para as proximas listas adicionadas
+                id: JSON.parse(localStorage.getItem("Lista_notas_Alunos")).length,
+                nomeAluno: nome,
+                nota01: nota01,
+                nota02: nota02,
+                media: dados.media,
+                status: dados.status
+            })
+
+            //Salva o localStorage
+            localStorage.setItem("Lista_notas_Alunos", JSON.stringify(Lista));
+            lista = JSON.parse(localStorage.getItem("Lista_notas_Alunos")) || [];
+            RenderizaTabelaHistorico()
+            console.log("localStorage Salvo")
+        });
+
+        //O numero entre colchetes é o ID
+        console.log(lista[1])
+
+        RenderizaTabelaHistorico()
+        console.log("feito")
+
+
+
+    </script>
 </body>
 
 </html>

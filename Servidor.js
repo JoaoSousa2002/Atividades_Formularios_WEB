@@ -1,14 +1,16 @@
 const express = require('express');
+const cors = require('cors')
 const app = express();
 
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: 'http://127.0.0.1:5500' }));
+app.use(express.json());
+app.use(express.static('public'));;
 
+let resposta = ""
 app.post('/calcular-nota', (req, res) => {
-    const nome = req.body.nomeAluno;
-    const nota01 = Number(req.body.nota01);
-    const nota02 = Number(req.body.nota02);
-    const media = (nota01 + nota02) / 2;
+    const nota01 = Number(req.body.nota01)
+    const nota02 = Number(req.body.nota02)
+    const media = Number((nota01 + nota02) / 2);
 
     if (media >= 6) {
         resposta = 'Aprovado';
@@ -18,14 +20,12 @@ app.post('/calcular-nota', (req, res) => {
         resposta = 'Reprovado';
     }
 
-    res.send(
-        `<h1>Resultado da Avaliação</h1>
-        <p>Nome do(a) aluno(a): ${nome}</p>
-        <p>Nota 1: ${nota01}</p>
-        <p>Nota 2: ${nota02}</p>
-        <p>Média: ${media}</p>
-        <p>Status: ${resposta}</p`
-    );
+
+    res.json({
+        media: media,
+        status: resposta
+    });
+
 });
 
 // Iniciar o servidor
